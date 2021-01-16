@@ -203,10 +203,20 @@ namespace CsvBenchmark
 		}
 
 		[Benchmark]
-		public void CursivelyCsv()
+		public void CursivelyCsvNoPooling()
 		{
 			var d = TestData.GetUtf8Array();
 			var proc = new CursivelyStringVisitor(false);
+			CsvSyncInput
+				.ForMemory(d)
+				.Process(proc);
+		}
+
+		[Benchmark]
+		public void CursivelyCsvWithPooling()
+		{
+			var d = TestData.GetUtf8Array();
+			var proc = new CursivelyStringVisitor(true);
 			CsvSyncInput
 				.ForMemory(d)
 				.Process(proc);
@@ -252,10 +262,19 @@ namespace CsvBenchmark
 		}
 
 		[Benchmark]
-		public void Sylvan()
+		public void SylvanNoPooling()
 		{
 			using var tr = TestData.GetTextReader();
 			var opts = new CsvDataReaderOptions { BufferSize = BufferSize };
+			using var dr = CsvDataReader.Create(tr, opts);
+			dr.ProcessStrings();
+		}
+
+		[Benchmark]
+		public void SylvanWithPooling()
+		{
+			using var tr = TestData.GetTextReader();
+			var opts = new CsvDataReaderOptions { BufferSize = BufferSize, StringFactory = StringPool.Pool };
 			using var dr = CsvDataReader.Create(tr, opts);
 			dr.ProcessStrings();
 		}

@@ -1,8 +1,11 @@
-﻿namespace CsvBenchmark
+﻿using System;
+using System.Text;
+
+namespace CsvBenchmark
 {
 	internal static class StringPool
 	{
-		internal static readonly string[] Strings = new string[128];
+		private static readonly string[] Strings = new string[128];
 
 		static StringPool()
 		{
@@ -10,6 +13,21 @@
 			{
 				Strings[i] = ((char)i).ToString();
 			}
+		}
+
+		internal static string PoolUtf8(ReadOnlySpan<byte> buf)
+		{
+			if (buf.IsEmpty)
+			{
+				return string.Empty;
+			}
+
+			if (buf.Length == 1 && buf[0] < 128)
+			{
+				return Strings[buf[0]];
+			}
+
+			return Encoding.UTF8.GetString(buf);
 		}
 
 		internal static string Pool(char[] buf, int offset, int length)

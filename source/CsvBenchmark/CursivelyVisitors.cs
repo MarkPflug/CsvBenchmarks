@@ -28,8 +28,8 @@ namespace CsvBenchmark
 				chunk = new ReadOnlySpan<byte>(bytes, 0, bytesUsed + chunk.Length);
 				bytesUsed = 0;
 			}
-			var str = doPooling && chunk.Length == 1 && chunk[0] < 128
-				? StringPool.Strings[chunk[0]]
+			var str = doPooling
+				? StringPool.PoolUtf8(chunk)
 				: Encoding.UTF8.GetString(chunk);
 			ordinal++;
 		}
